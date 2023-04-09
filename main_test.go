@@ -1,12 +1,15 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/fabiovalinhos/validacoes-teste-paginashtml/controllers"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 func SetupDasRotasDeTeste() *gin.Engine {
@@ -25,7 +28,18 @@ func TestStatusCodeDaSaudacao(t *testing.T) {
 
 	r.ServeHTTP(resposta, req)
 
-	if resposta.Code != http.StatusOK {
-		t.Fatalf("Status error: valor recebido foi %d e o esperado era %d", resposta.Code, http.StatusOK)
-	}
+	// irei usar o testify
+	// if resposta.Code != http.StatusOK {
+	// 	t.Fatalf("Status error: valor recebido foi %d e o esperado era %d", resposta.Code, http.StatusOK)
+	// }
+
+	assert := assert.New(t)
+	assert.Equal(http.StatusOK, resposta.Code, "O valor recebido poderia ser igual ao esperado")
+
+	mockDaResposta := `{"API diz:":"E ai bruce, tudo beleza?"}`
+	respostaBody, _ := ioutil.ReadAll(resposta.Body)
+
+	assert.Equal(mockDaResposta, string(respostaBody))
+
+	fmt.Println(string(respostaBody))
 }
