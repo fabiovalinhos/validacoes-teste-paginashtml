@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/fabiovalinhos/validacoes-teste-paginashtml/controllers"
+	"github.com/fabiovalinhos/validacoes-teste-paginashtml/database"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -42,4 +43,21 @@ func TestStatusCodeDaSaudacao(t *testing.T) {
 	assert.Equal(mockDaResposta, string(respostaBody))
 
 	fmt.Println(string(respostaBody))
+}
+
+func TestListandoTodosOsAlunosHandler(t *testing.T) {
+	database.ConectaComBancoDeDados()
+
+	r := SetupDasRotasDeTeste()
+	r.GET("/alunos", controllers.ExibeTodosAlunos)
+
+	req, _ := http.NewRequest("GET", "/alunos", nil)
+	resposta := httptest.NewRecorder()
+
+	r.ServeHTTP(resposta, req)
+
+	assert := assert.New(t)
+	assert.Equal(http.StatusOK, resposta.Code)
+
+	fmt.Println(resposta.Body)
 }
