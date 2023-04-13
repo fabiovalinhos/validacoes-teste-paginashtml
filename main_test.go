@@ -9,14 +9,28 @@ import (
 
 	"github.com/fabiovalinhos/validacoes-teste-paginashtml/controllers"
 	"github.com/fabiovalinhos/validacoes-teste-paginashtml/database"
+	"github.com/fabiovalinhos/validacoes-teste-paginashtml/models"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
+
+var ID int
 
 func SetupDasRotasDeTeste() *gin.Engine {
 	rotas := gin.Default()
 
 	return rotas
+}
+
+func CriaAlunoMock() {
+	aluno := models.Aluno{Nome: "Aluno Teste", CPF: "12345678901", RG: "123456789"}
+	database.DB.Create(&aluno)
+	ID = int(aluno.ID)
+}
+
+func DeletaAlunoMock() {
+	var aluno models.Aluno
+	database.DB.Delete(&aluno, ID)
 }
 
 func TestStatusCodeDaSaudacao(t *testing.T) {
@@ -47,6 +61,9 @@ func TestStatusCodeDaSaudacao(t *testing.T) {
 
 func TestListandoTodosOsAlunosHandler(t *testing.T) {
 	database.ConectaComBancoDeDados()
+
+	CriaAlunoMock()
+	defer DeletaAlunoMock()
 
 	r := SetupDasRotasDeTeste()
 	r.GET("/alunos", controllers.ExibeTodosAlunos)
