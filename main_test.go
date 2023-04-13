@@ -17,13 +17,17 @@ import (
 var ID int
 
 func SetupDasRotasDeTeste() *gin.Engine {
+	// Simplifica as mensagens de teste
+	gin.SetMode(gin.ReleaseMode)
+
+	///
 	rotas := gin.Default()
 
 	return rotas
 }
 
 func CriaAlunoMock() {
-	aluno := models.Aluno{Nome: "Aluno Teste", CPF: "12345678901", RG: "123456789"}
+	aluno := models.Aluno{Nome: "Aluno Teste", CPF: "43215678901", RG: "123456789"}
 	database.DB.Create(&aluno)
 	ID = int(aluno.ID)
 }
@@ -77,4 +81,21 @@ func TestListandoTodosOsAlunosHandler(t *testing.T) {
 	assert.Equal(http.StatusOK, resposta.Code)
 
 	fmt.Println(resposta.Body)
+}
+
+func TestBuscaAlunoPorCPF(t *testing.T) {
+
+	database.ConectaComBancoDeDados()
+
+	CriaAlunoMock()
+	defer DeletaAlunoMock()
+
+	r := SetupDasRotasDeTeste()
+	r.GET("/alunos/cpf/:cpf", controllers.BuscaAlunoPorCPF)
+
+	req, _ := http.NewRequest("GET", "/alunos/cpf/43215678901", nil)
+	resposta := httptest.NewRecorder()
+
+	r.ServeHTTP(resposta, req)
+	assert.Equal(t, http.StatusOK, resposta.Code)
 }
