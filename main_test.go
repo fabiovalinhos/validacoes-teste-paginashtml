@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/fabiovalinhos/validacoes-teste-paginashtml/controllers"
@@ -98,4 +100,26 @@ func TestBuscaAlunoPorCPF(t *testing.T) {
 
 	r.ServeHTTP(resposta, req)
 	assert.Equal(t, http.StatusOK, resposta.Code)
+}
+
+func TestAlunoPorIDHandler(t *testing.T) {
+	database.ConectaComBancoDeDados()
+	CriaAlunoMock()
+	defer DeletaAlunoMock()
+
+	r := SetupDasRotasDeTeste()
+	r.GET("/alunos/:id", controllers.BuscaAlunoPorID)
+
+	pathDaBusca := "/alunos/" + strconv.Itoa(ID)
+
+	req, _ := http.NewRequest("GET", pathDaBusca, nil)
+	resposta := httptest.NewRecorder()
+
+	r.ServeHTTP(resposta, req)
+
+	var alunoMock models.Aluno
+	json.Unmarshal(resposta.Body.Bytes(), &alunoMock)
+	fmt.Println(alunoMock.RG)
+
+	assert.Equal(t, "Aluno Teste", alunoMock.Nome)
 }
