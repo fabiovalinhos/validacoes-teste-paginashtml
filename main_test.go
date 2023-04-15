@@ -119,7 +119,25 @@ func TestAlunoPorIDHandler(t *testing.T) {
 
 	var alunoMock models.Aluno
 	json.Unmarshal(resposta.Body.Bytes(), &alunoMock)
-	fmt.Println(alunoMock.RG)
 
 	assert.Equal(t, "Aluno Teste", alunoMock.Nome)
+	assert.Equal(t, "43215678901", alunoMock.CPF)
+	assert.Equal(t, "123456789", alunoMock.RG)
+}
+
+func TestDeletaAlunoHandler(t *testing.T) {
+	database.ConectaComBancoDeDados()
+
+	CriaAlunoMock()
+
+	r := SetupDasRotasDeTeste()
+	r.DELETE("/alunos/:id", controllers.DeletaAluno)
+	pathDeBusca := "/alunos/" + strconv.Itoa(ID)
+
+	req, _ := http.NewRequest("DELETE", pathDeBusca, nil)
+	resposta := httptest.NewRecorder()
+
+	r.ServeHTTP(resposta, req)
+
+	assert.Equal(t, http.StatusOK, resposta.Code)
 }
